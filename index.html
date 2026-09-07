@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#6750A4">
+  <title>Progres Kerja Android</title>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --md-primary: #6750A4;
+      --md-on-primary: #FFFFFF;
+      --md-surface: #FEF7FF;
+      --md-card: #F3EDF7;
+      --md-text: #1D1B20;
+      --md-subtext: #49454F;
+      --md-green: #2E7D32;
+      --md-error: #B3261E;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Roboto', sans-serif;
+      background-color: var(--md-surface);
+      color: var(--md-text);
+      margin: 0;
+      padding: 0 0 80px 0;
+    }
+    .top-app-bar {
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      padding: 16px 20px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .top-app-bar h1 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 500;
+    }
+    .container {
+      padding: 20px 16px;
+    }
+    .progress-card {
+      background: var(--md-card);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 20px;
+    }
+    .progress-title {
+      font-size: 14px;
+      color: var(--md-subtext);
+      margin-bottom: 8px;
+    }
+    .progress-track {
+      background: #E7E0EC;
+      height: 8px;
+      border-radius: 4px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-fill {
+      background: var(--md-green);
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-stats {
+      font-size: 14px;
+      font-weight: 500;
+      text-align: right;
+      color: var(--md-text);
+    }
+    .task-list {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .task-item {
+      background: #FFFFFF;
+      border: 1px solid #CAC4D0;
+      border-radius: 12px;
+      padding: 12px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+    }
+    .task-item:active {
+      background: #F5F5F5;
+    }
+    .task-item input[type="checkbox"] {
+      width: 20px;
+      height: 20px;
+      accent-color: var(--md-primary);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .task-text {
+      flex: 1;
+      font-size: 16px;
+    }
+    .task-text.completed {
+      text-decoration: line-through;
+      color: var(--md-subtext);
+    }
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--md-error);
+      font-size: 20px;
+      cursor: pointer;
+      flex-shrink: 0;
+      padding: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .delete-btn:active {
+      opacity: 0.7;
+    }
+    .empty-state {
+      text-align: center;
+      padding: 40px 20px;
+      color: var(--md-subtext);
+    }
+    .empty-state p {
+      margin: 0;
+      font-size: 16px;
+    }
+    /* Floating Action Button (FAB) Input */
+    .input-section {
+      position: fixed;
+      bottom: 20px;
+      left: 16px;
+      right: 16px;
+      display: flex;
+      gap: 8px;
+      z-index: 90;
+    }
+    .input-section input {
+      flex: 1;
+      padding: 14px 18px;
+      border: 1px solid #79747E;
+      border-radius: 28px;
+      font-size: 16px;
+      outline: none;
+      background: #FFFFFF;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    }
+    .input-section input:focus {
+      border-color: var(--md-primary);
+      box-shadow: 0 2px 6px rgba(103, 80, 164, 0.3);
+    }
+    .input-section button {
+      background: var(--md-primary);
+      color: var(--md-on-primary);
+      border: none;
+      border-radius: 28px;
+      padding: 0 20px;
+      font-size: 16px;
+      font-weight: 500;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+      cursor: pointer;
+      transition: background 0.2s ease;
+    }
+    .input-section button:active {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="top-app-bar">
+    <h1>Progres Kerja</h1>
+  </div>
+
+  <div class="container">
+    <div class="progress-card">
+      <div class="progress-title">Ringkasan Progres</div>
+      <div class="progress-track">
+        <div class="progress-fill" id="progressFill"></div>
+      </div>
+      <div class="progress-stats">
+        <span id="completedCount">0</span> / <span id="totalCount">0</span>
+      </div>
+    </div>
+
+    <div id="taskListContainer">
+      <div class="task-list" id="taskList"></div>
+    </div>
+  </div>
+
+  <div class="input-section">
+    <input 
+      type="text" 
+      id="taskInput" 
+      placeholder="Tambah tugas baru..."
+      autocomplete="off"
+    >
+    <button id="addBtn">Tambah</button>
+  </div>
+
+  <script>
+    // Local Storage Key
+    const STORAGE_KEY = 'tasks-list';
+
+    // DOM Elements
+    const taskInput = document.getElementById('taskInput');
+    const addBtn = document.getElementById('addBtn');
+    const taskList = document.getElementById('taskList');
+    const taskListContainer = document.getElementById('taskListContainer');
+    const progressFill = document.getElementById('progressFill');
+    const completedCount = document.getElementById('completedCount');
+    const totalCount = document.getElementById('totalCount');
+
+    // Load tasks from localStorage
+    function loadTasks() {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    }
+
+    // Save tasks to localStorage
+    function saveTasks(tasks) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(tasks));
+    }
+
+    // Update progress bar
+    function updateProgress(tasks) {
+      const total = tasks.length;
+      const completed = tasks.filter(t => t.completed).length;
+      
+      totalCount.textContent = total;
+      completedCount.textContent = completed;
+      
+      const percentage = total === 0 ? 0 : (completed / total) * 100;
+      progressFill.style.width = percentage + '%';
+    }
+
+    // Render tasks
+    function renderTasks() {
+      const tasks = loadTasks();
+      taskList.innerHTML = '';
+      
+      if (tasks.length === 0) {
+        taskListContainer.innerHTML = '<div class="empty-state"><p>Belum ada tugas. Tambahkan satu untuk memulai!</p></div>';
+        updateProgress(tasks);
+        return;
+      }
+
+      taskListContainer.innerHTML = '<div class="task-list" id="taskList"></div>';
+      const updatedList = document.getElementById('taskList');
+
+      tasks.forEach((task, index) => {
+        const taskItem = document.createElement('div');
+        taskItem.className = 'task-item';
+        
+        const checkbox = document.createElement('input');
+        checkbox.type = 'checkbox';
+        checkbox.checked = task.completed;
+        checkbox.addEventListener('change', () => toggleTask(index));
+        
+        const taskText = document.createElement('div');
+        taskText.className = 'task-text';
+        if (task.completed) {
+          taskText.classList.add('completed');
+        }
+        taskText.textContent = task.text;
+        
+        const deleteBtn = document.createElement('button');
+        deleteBtn.className = 'delete-btn';
+        deleteBtn.innerHTML = '✕';
+        deleteBtn.addEventListener('click', () => deleteTask(index));
+        
+        taskItem.appendChild(checkbox);
+        taskItem.appendChild(taskText);
+        taskItem.appendChild(deleteBtn);
+        updatedList.appendChild(taskItem);
+      });
+
+      updateProgress(tasks);
+    }
+
+    // Add task
+    function addTask() {
+      const text = taskInput.value.trim();
+      if (!text) {
+        alert('Silakan masukkan tugas!');
+        return;
+      }
+
+      const tasks = loadTasks();
+      tasks.push({ text, completed: false });
+      saveTasks(tasks);
+      taskInput.value = '';
+      renderTasks();
+      taskInput.focus();
+    }
+
+    // Toggle task completion
+    function toggleTask(index) {
+      const tasks = loadTasks();
+      tasks[index].completed = !tasks[index].completed;
+      saveTasks(tasks);
+      renderTasks();
+    }
+
+    // Delete task
+    function deleteTask(index) {
+      if (confirm('Hapus tugas ini?')) {
+        const tasks = loadTasks();
+        tasks.splice(index, 1);
+        saveTasks(tasks);
+        renderTasks();
+      }
+    }
+
+    // Event Listeners
+    addBtn.addEventListener('click', addTask);
+    taskInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        addTask();
+      }
+    });
+
+    // Initial render
+    renderTasks();
+  </script>
+
+</body>
+</html>
